@@ -1,0 +1,7 @@
+automation_id: {{.AutomationID}}
+handler: main:handler
+fields:
+  - name: example_field
+    type: string
+    required: true
+    description: Example input field

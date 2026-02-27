@@ -1,0 +1,39 @@
+# Build the stax-cli binary for multiple OS/arch.
+# Version and tag come from go-semantic-release when run via the goreleaser hook.
+builds:
+  - id: stax-cli
+    main: .
+    binary: stax-cli
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .Date }}
+
+archives:
+  - id: stax-cli
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+release:
+  github:
+    owner: stax-ai
+    name: stax-cli
+
+# Publish a Homebrew formula to a separate tap repo.
+# Set the HOMEBREW_TAP_TOKEN secret to a PAT with write access to the tap repo.
+brews:
+  - name: stax-cli
+    repository:
+      owner: stax-ai
+      name: homebrew-stax
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/stax-ai/stax-cli"
+    description: "CLI for Stax automations (create, generate, run, build)"

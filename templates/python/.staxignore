@@ -1,0 +1,7 @@
+.git
+__pycache__
+.venv
+.stax.yml
+*.pyc
+.pytest_cache
+tests

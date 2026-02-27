@@ -1,0 +1,22 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars: {}
+
+tasks:
+  test:
+    cmds:
+      - go test ./...
+    silent: true
+  generate-docs:
+    cmds:
+      - go run internal/tool/docgen/main.go
+    silent: true
+
+  build:
+    cmds:
+      - go build -o ./dist/stax-cli main.go
+    silent: true
+    deps:
+      - generate-docs

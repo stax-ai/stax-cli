@@ -6,5 +6,5 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 def test_import_handler():
-    from templates.python.src.main import handler
+    from {{.ProjectNamePy}} import handler
     assert callable(handler)

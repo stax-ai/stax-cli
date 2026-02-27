@@ -24,7 +24,7 @@ func TestScaffold_CreatesLayout(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, projectRoot)
 
-	// Required files and dirs
+	// Required files and dirs (src layout: package at src/<project_underscores>/)
 	expected := []string{
 		"config.yml",
 		"pyproject.toml",
@@ -35,7 +35,8 @@ func TestScaffold_CreatesLayout(t *testing.T) {
 		".staxignore",
 		"tests/test_handler.py",
 		".github/workflows/ci.yml",
-		"src", // dir
+		"src/my_automation/__init__.py",
+		"src/my_automation/py.typed",
 	}
 	for _, name := range expected {
 		p := filepath.Join(projectRoot, name)
@@ -84,6 +85,8 @@ func TestScaffold_PyprojectContent(t *testing.T) {
 	assert.Contains(t, body, "pydantic")
 	assert.Contains(t, body, "ruff")
 	assert.Contains(t, body, "pytest")
+	assert.Contains(t, body, "uv_build")
+	assert.Contains(t, body, "build-backend")
 }
 
 func TestScaffold_MainPyHasStaxHandler(t *testing.T) {
@@ -94,10 +97,19 @@ func TestScaffold_MainPyHasStaxHandler(t *testing.T) {
 	projectRoot, err := Scaffold(ctx, opts)
 	require.NoError(t, err)
 
+	// Thin main.py imports handler from package and runs if __name__
 	mainPath := filepath.Join(projectRoot, "main.py")
 	data, err := os.ReadFile(mainPath)
 	require.NoError(t, err)
 	body := string(data)
+	assert.Contains(t, body, "import handler")
+	assert.Contains(t, body, "if __name__")
+
+	// Handler and stax_sdk live in package __init__.py
+	pkgInit := filepath.Join(projectRoot, "src", "p", "__init__.py")
+	data, err = os.ReadFile(pkgInit)
+	require.NoError(t, err)
+	body = string(data)
 	assert.Contains(t, body, "stax_sdk")
 	assert.Contains(t, body, "def handler(")
 	assert.Contains(t, body, "@stax_handler")

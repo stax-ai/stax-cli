@@ -42,5 +42,5 @@ stax-cli create [project-name] [flags]
 
 ### SEE ALSO
 
-* [stax-cli](stax-cli.md)	 - CLI for Stax automations (create, generate, run, build)
+* [stax-cli](stax-cli.md)	 - CLI for Stax automations (create, init, generate, run, build)
 

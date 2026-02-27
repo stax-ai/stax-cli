@@ -65,13 +65,6 @@ func Scaffold(ctx context.Context, opts Options) (string, error) {
 		return "", err
 	}
 
-	// Empty dirs not present in template tree
-	for _, d := range []string{"src"} {
-		if err := os.MkdirAll(filepath.Join(projectRoot, d), 0755); err != nil {
-			return "", fmt.Errorf("create %s: %w", d, err)
-		}
-	}
-
 	abs, _ := filepath.Abs(projectRoot)
 	return abs, nil
 }
@@ -102,6 +95,8 @@ func writeTemplateFS(projectRoot, templateName string, tplFS fs.FS, data templat
 		if strings.HasPrefix(path, prefix) {
 			relPath = path[len(prefix):]
 		}
+		// Rewrite sentinel _pkg_ to actual package name (e.g. src/_pkg_/__init__.py -> src/my_automation/__init__.py).
+		relPath = strings.ReplaceAll(relPath, "_pkg_", data.ProjectNamePy)
 		dest := filepath.Join(projectRoot, filepath.FromSlash(relPath))
 		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
 			return fmt.Errorf("create dir for %s: %w", path, err)

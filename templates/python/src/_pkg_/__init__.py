@@ -15,9 +15,3 @@ def handler(event):
     data = event.get("data") or {}
     print(json.dumps({"received": data}), file=sys.stderr)
     return {"ok": True}
-
-if __name__ == "__main__":
-    # Allow CLI to pass JSON CloudEvent via stdin
-    payload = json.load(sys.stdin)
-    result = handler(payload)
-    print(json.dumps(result))

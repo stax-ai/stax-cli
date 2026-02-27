@@ -25,6 +25,6 @@ when running a subcommand.
 
 ### SEE ALSO
 
-* [stax-cli](stax-cli.md)	 - CLI for Stax automations (create, generate, run, build)
+* [stax-cli](stax-cli.md)	 - CLI for Stax automations (create, init, generate, run, build)
 * [stax-cli generate pydantic](stax-cli_generate_pydantic.md)	 - Generate a Pydantic model from config.yml fields
 

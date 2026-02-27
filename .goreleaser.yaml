@@ -14,6 +14,17 @@ builds:
     ldflags:
       - -s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .Date }}
 
+
+pkgs:
+  - id: stax-cli
+    name: '{{ .ProjectName }}_{{ .Version }}_{{ if neq .Arch "all" }}_{{.Arch}}{{ end }}'
+    use: binary
+    if: '{{ eq .Arch "arm64" }}'
+    identifier: com.stax-ai.stax-cli
+    install_location: /usr/local/bin
+    replace: true
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
 archives:
   - id: stax-cli
     format: tar.gz

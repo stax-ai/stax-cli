@@ -11,15 +11,17 @@ import (
 
 	"github.com/stax-ai/stax-cli/internal/automation"
 	"github.com/stax-ai/stax-cli/internal/build"
+	"github.com/stax-ai/stax-cli/internal/deploy"
+	"github.com/stax-ai/stax-cli/internal/doppler"
 )
 
 var (
-	buildPath        string
-	buildImage       string
-	buildRegistry    string
-	buildBuilder     string
+	buildPath         string
+	buildImage        string
+	buildRegistry     string
+	buildBuilder      string
 	buildTrustBuilder bool
-	buildVerbose    bool
+	buildVerbose      bool
 )
 
 func init() {
@@ -65,18 +67,26 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	dopplerProject, dopplerConfig, err := deriveDopplerTarget(projectRoot, image)
+	if err != nil {
+		return err
+	}
+	if err := doppler.EnsureProjectAndConfig(ctx, dopplerProject, dopplerConfig); err != nil {
+		return fmt.Errorf("ensure doppler project/config: %w", err)
+	}
+
 	excludes, err := build.ReadStaxignore(projectRoot)
 	if err != nil {
 		return fmt.Errorf("read .staxignore: %w", err)
 	}
 
 	opts := build.Options{
-		ProjectRoot:   projectRoot,
-		Image:         image,
-		Builder:       buildBuilder,
-		Exclude:       excludes,
-		TrustBuilder:  buildTrustBuilder,
-		Verbose:       buildVerbose,
+		ProjectRoot:  projectRoot,
+		Image:        image,
+		Builder:      buildBuilder,
+		Exclude:      excludes,
+		TrustBuilder: buildTrustBuilder,
+		Verbose:      buildVerbose,
 	}
 
 	if err := build.Build(ctx, opts, nil); err != nil {
@@ -99,4 +109,51 @@ func deriveImage(projectRoot string) (string, error) {
 	}
 	registry := strings.TrimSuffix(buildRegistry, "/")
 	return registry + "/" + cfg.AutomationID + ":latest", nil
+}
+
+func deriveDopplerTarget(projectRoot, image string) (string, string, error) {
+	dopplerProject := deriveImagePackageName(image)
+	if dopplerProject == "" {
+		return "", "", fmt.Errorf("could not derive doppler project from image %q", image)
+	}
+
+	dopplerConfig := strings.TrimSpace(os.Getenv("DOPPLER_CONFIG"))
+
+	deployCfg, _, err := deploy.FindAndLoadConfig(projectRoot)
+	if err == nil {
+		if deployCfg.ServiceName != "" {
+			dopplerProject = deployCfg.ServiceName
+		}
+		if deployCfg.Environment != "" {
+			dopplerConfig = deployCfg.Environment
+		}
+	}
+
+	if dopplerConfig == "" {
+		dopplerConfig = strings.TrimSpace(os.Getenv("STAX_ENVIRONMENT"))
+	}
+	if dopplerConfig == "" {
+		return "", "", fmt.Errorf("could not determine doppler config: set environment in config.yaml or provide DOPPLER_CONFIG/STAX_ENVIRONMENT")
+	}
+
+	return dopplerProject, dopplerConfig, nil
+}
+
+func deriveImagePackageName(image string) string {
+	name := strings.TrimSpace(image)
+	if name == "" {
+		return ""
+	}
+
+	if idx := strings.Index(name, "@"); idx >= 0 {
+		name = name[:idx]
+	}
+	if slash := strings.LastIndex(name, "/"); slash >= 0 && slash < len(name)-1 {
+		name = name[slash+1:]
+	}
+	if colon := strings.Index(name, ":"); colon >= 0 {
+		name = name[:colon]
+	}
+
+	return strings.TrimSpace(name)
 }

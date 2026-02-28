@@ -1,3 +1,5 @@
+version: 2
+
 # Build the stax-cli binary for multiple OS/arch.
 # Version and tag come from go-semantic-release when run via the goreleaser hook.
 builds:

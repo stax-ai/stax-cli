@@ -19,21 +19,23 @@ var configFile string
 // rootCmd is the entrypoint when running stax-cli without a subcommand.
 var rootCmd = &cobra.Command{
 	Use:   "stax-cli",
-	Short: "CLI for Stax automations (create, init, generate, run, build)",
+	Short: "CLI for Stax automations (create, init, generate, run, build, deploy)",
 	Long: `stax-cli manages Stax automation projects: scaffold Python projects with
 config.yml, generate Pydantic models from config, run handlers locally
 with CloudEvents, and build container images with buildpacks.
 
 Commands:
-  config   Read or write global CLI config (.stax.yml)
-  create   Scaffold a new Python automation project (UV, stax-sdk, Ruff, pytest)
-  init     Initialize an existing repo with UV, linting, GitHub Actions, config.yml
-  generate Generate code from config.yml (e.g. Pydantic models)
-  run      Invoke the automation handler once with a CloudEvent (one-shot)
-  build    Build a container image from the project using Cloud Native Buildpacks
+  config      Read or write global CLI config (.stax.yml)
+  create      Scaffold a new Python automation project (UV, stax-sdk, Ruff, pytest)
+  init        Initialize an existing repo with UV, linting, GitHub Actions, config.yml
+  legacy-init Initialize deployment config.yaml for legacy cloud run functions
+  generate    Generate code from config.yml (e.g. Pydantic models)
+  run         Invoke the automation handler once with a CloudEvent (one-shot)
+  build       Build a container image from the project using Cloud Native Buildpacks
+  deploy      Build and deploy a container image to Kubernetes with Knative and camel-k
 
 Global flags (e.g. --config-file) apply to config get/set. Project commands
-(create, init, generate, run, build) use config.yml in the project directory.`,
+(create, init, generate, run, build, deploy) use config.yml in the project directory.`,
 }
 
 // SetVersion sets the version string shown by --version (injected at build time by GoReleaser).
